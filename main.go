@@ -1,11 +1,16 @@
 package main
 
 import (
+	"example/bluebean-go/routes"
 	"example/bluebean-go/database"
 	"example/bluebean-go/utils"
 )
 
-func main() {
+func main() {	
+  
 	utils.LoadEnv()
-	database.SetupDB()
+	database.SetupDB() 
+  
+  router := routes.SetupRoutes()
+	router.Run(":8080");
 }
