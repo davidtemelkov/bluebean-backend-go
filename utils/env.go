@@ -23,3 +23,36 @@ func GetConnectionString() string {
 
 	return dbConnectionString
 }
+
+func GetJWTKey() string {
+	jwtKey := os.Getenv("JWT_KEY")
+
+	if jwtKey == "" {
+		log.Fatal("JWT_KEY environment variable is not set")
+	}
+
+	return jwtKey
+
+}
+
+func GetJWTIssuer() string {
+	jwtIssuer := os.Getenv("JWT_ISSUER")
+
+	if jwtIssuer == "" {
+		log.Fatal("JWT_ISSUER environment variable is not set")
+	}
+
+	return jwtIssuer
+
+}
+
+func GetJWTAudience() string {
+	jwtAudience := os.Getenv("JWT_AUDIENCE")
+
+	if jwtAudience == "" {
+		log.Fatal("JWT_AUDIENCE environment variable is not set")
+	}
+
+	return jwtAudience
+
+}
