@@ -24,14 +24,24 @@ func GetConnectionString() string {
 	return dbConnectionString
 }
 
-func GetTest() string {
-	test := os.Getenv("Test")
+func GetFirebaseUrl() string {
+	firebaseUrl := os.Getenv("FIREBASE_URL")
 
-	if test == "" {
-		log.Fatal("DB_CONNECTION_STRING environment variable is not set")
+	if firebaseUrl == "" {
+		log.Fatal("FIREBASE_URL environment variable is not set")
 	}
 
-	return test
+	return firebaseUrl
+}
+
+func GetFirebaseBucketName() string {
+	firebaseBucketName := os.Getenv("FIREBASE_BUCKET_NAME")
+
+	if firebaseBucketName == "" {
+		log.Fatal("FIREBASE_URL environment variable is not set")
+	}
+
+	return firebaseBucketName
 }
 
 func GetJWTKey() string {

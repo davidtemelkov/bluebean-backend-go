@@ -20,7 +20,9 @@ func NewFireBaseStorage(bucket string) *FireBaseStorage {
 }
 
 func UploadFile(photo64, fileFolder, fileName string) (string, error) {
-	fb := NewFireBaseStorage("bluebean-4d5ab.appspot.com")
+	bucketName := GetFirebaseBucketName()
+
+	fb := NewFireBaseStorage(bucketName)
 	ctx := context.Background()
 	opt := option.WithCredentialsFile("utils/serviceAccountKey.json")
 
@@ -44,10 +46,8 @@ func UploadFile(photo64, fileFolder, fileName string) (string, error) {
 		return "", err
 	}
 
-	attrs, err := client.Bucket(fb.Bucket).Object(filePath).Attrs(ctx)
-	if err != nil {
-		return "", err
-	}
+	firebaseUrl := GetFirebaseUrl()
+	url := "https://firebasestorage.googleapis.com" + firebaseUrl + fileFolder + "%2F" + fileName + "?alt=media"
 
-	return attrs.MediaLink, nil
+	return url, nil
 }
