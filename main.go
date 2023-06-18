@@ -6,9 +6,9 @@ import (
 	"example/bluebean-go/utils"
 )
 
-func main() {	
-  
+func main() {
+
 	utils.LoadEnv()
-	database.SetupDB() 
-  	routes.SetupRoutes()
+	database.SetupDB()
+	routes.SetupRoutes()
 }

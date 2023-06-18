@@ -3,51 +3,51 @@ package utils
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"log"
 
-	firebase "firebase.google.com/go"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
 )
 
-func UploadFile(photo64 string, fileFolder string, fileName string) (string, error) {
+type FireBaseStorage struct {
+	Bucket string
+}
+
+func NewFireBaseStorage(bucket string) *FireBaseStorage {
+	return &FireBaseStorage{
+		Bucket: bucket,
+	}
+}
+
+func UploadFile(photo64, fileFolder, fileName string) (string, error) {
+	bucketName := GetFirebaseBucketName()
+
+	fb := NewFireBaseStorage(bucketName)
+	ctx := context.Background()
 	opt := option.WithCredentialsFile("utils/serviceAccountKey.json")
 
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	client, err := storage.NewClient(ctx, opt)
 	if err != nil {
-		log.Fatalf("Error initializing Firebase app: %v", err)
+		log.Fatalf("Failed to initialize Firebase Storage client: %v", err)
 	}
 
-	client, err := app.Storage(context.Background())
+	photoData, err := base64.StdEncoding.DecodeString(photo64)
 	if err != nil {
-		log.Fatalf("Error initializing Firebase Storage client: %v", err)
-	}
-
-	fileBytes, err := base64.StdEncoding.DecodeString(photo64)
-	if err != nil {
-		return "", fmt.Errorf("error decoding file: %v", err)
+		return "", err
 	}
 
 	filePath := fileFolder + "/" + fileName
-
-	bucket, err := client.Bucket("bluebean-4d5ab.appspot.com")
-	if err != nil {
-		return "", fmt.Errorf("error getting bucket handle: %v", err)
+	wc := client.Bucket(fb.Bucket).Object(filePath).NewWriter(ctx)
+	wc.ContentType = "image/jpeg" // Set the appropriate content type if needed
+	if _, err := wc.Write(photoData); err != nil {
+		return "", err
+	}
+	if err := wc.Close(); err != nil {
+		return "", err
 	}
 
-	writer := bucket.Object(filePath).NewWriter(context.Background())
-	if _, err := writer.Write(fileBytes); err != nil {
-		return "", fmt.Errorf("error uploading file to Firebase Storage: %v", err)
-	}
+	firebaseUrl := GetFirebaseUrl()
+	url := "https://firebasestorage.googleapis.com" + firebaseUrl + fileFolder + "%2F" + fileName + "?alt=media"
 
-	if err := writer.Close(); err != nil {
-		return "", fmt.Errorf("error closing writer: %v", err)
-	}
-	attrs, err := bucket.Object(filePath).Attrs(context.Background())
-	if err != nil {
-		return "", fmt.Errorf("error retrieving file attributes: %v", err)
-	}
-	downloadURL := attrs.MediaLink
-
-	return downloadURL, nil
+	return url, nil
 }
