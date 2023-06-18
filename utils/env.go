@@ -24,6 +24,16 @@ func GetConnectionString() string {
 	return dbConnectionString
 }
 
+func GetTest() string {
+	test := os.Getenv("Test")
+
+	if test == "" {
+		log.Fatal("DB_CONNECTION_STRING environment variable is not set")
+	}
+
+	return test
+}
+
 func GetJWTKey() string {
 	jwtKey := os.Getenv("JWT_KEY")
 
