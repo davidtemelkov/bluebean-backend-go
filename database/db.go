@@ -7,13 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var Db *gorm.DB
 
 func SetupDB() {
 	dbConnectionString := utils.GetConnectionString()
 
 	var err error
-	db, err = gorm.Open(sqlserver.Open(dbConnectionString), &gorm.Config{})
+	Db, err = gorm.Open(sqlserver.Open(dbConnectionString), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
