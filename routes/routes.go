@@ -14,7 +14,9 @@ func SetupRoutes() *gin.Engine {
 	{
 		facilitiesRoutes.GET("/", handlers.GetAllFacilities)
 		facilitiesRoutes.GET("/:facilityId", handlers.GetOneFacility)
-		//facilitiesRoutes.GET("/:facilityId/:userId", handlers.GetAllForUser)
+		facilitiesRoutes.GET("/user/:userId", handlers.GetAllFacilitiesForUser)
+
+		facilitiesRoutes.POST("/", handlers.CreateFacility)
 	}
 
 	r.Run(":8080")
