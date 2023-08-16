@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes() *gin.Engine {
+func setupRoutes() *gin.Engine {
 
 	r := gin.Default()
 	r.Run(":8080")

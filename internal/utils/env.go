@@ -33,3 +33,23 @@ func GetFirebaseBucketName() string {
 
 	return firebaseBucketName
 }
+
+func GetAWSAccessKey() string {
+	awsAccessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+
+	if awsAccessKey == "" {
+		log.Fatal("AWS_ACCESS_KEY_ID environment variable is not set")
+	}
+
+	return awsAccessKey
+}
+
+func GetAWSSecretKey() string {
+	awsSecretKey := os.Getenv("AWS_SECRET_KEY")
+
+	if awsSecretKey == "" {
+		log.Fatal("AWS_SECRET_KEY environment variable is not set")
+	}
+
+	return awsSecretKey
+}
