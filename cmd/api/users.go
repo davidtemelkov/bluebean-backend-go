@@ -2,6 +2,7 @@ package main
 
 import (
 	"example/bluebean-go/internal/data"
+	"example/bluebean-go/internal/validator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,8 +33,18 @@ func (app *application) regiserUserHandler(c *gin.Context) {
 		return
 	}
 
+	v := validator.New()
+	if data.ValidateUser(v, user); !v.Valid() {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": v.Errors})
+		return
+	}
+
 	err = app.models.Users.Insert(user)
 	if err != nil {
+		if err == data.ErrDuplicateEmail {
+			c.JSON(http.StatusConflict, gin.H{"error": "Duplicate email"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
 		return
 	}
