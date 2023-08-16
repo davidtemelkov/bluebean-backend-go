@@ -24,7 +24,7 @@ func UploadFile(photo64, fileFolder, fileName string) (string, error) {
 
 	fb := NewFireBaseStorage(bucketName)
 	ctx := context.Background()
-	opt := option.WithCredentialsFile("utils/serviceAccountKey.json")
+	opt := option.WithCredentialsFile("internal/utils/serviceAccountKey.json")
 
 	client, err := storage.NewClient(ctx, opt)
 	if err != nil {
