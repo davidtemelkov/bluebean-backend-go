@@ -22,32 +22,12 @@ type application struct {
 }
 
 func main() {
-
 	utils.LoadEnv()
 
-	awsAccessKeyID := utils.GetAWSAccessKey()
-
-	awsSecretAccessKey := utils.GetAWSSecretKey()
-
-	// Create a new AWS session
-
-	sess, err := session.NewSession(&aws.Config{
-
-		Region: aws.String("us-east-1"), // Change this to your preferred AWS region
-
-		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
-	})
-
+	db, err := openDb()
 	if err != nil {
-
-		fmt.Println("Error creating AWS session:", err)
-
-		return
-
+		panic("Db connection error")
 	}
-
-	// Create a new DynamoDB client
-	dbClient := dynamodb.New(sess)
 
 	// app := &application{
 	// 	models: data.NewModels(dbClient),
@@ -81,7 +61,7 @@ func main() {
 
 	// Put the item into DynamoDB table
 
-	_, err = dbClient.PutItem(input)
+	_, err = db.PutItem(input)
 
 	if err != nil {
 
@@ -95,4 +75,24 @@ func main() {
 
 	setupRoutes()
 
+}
+
+func openDb() (*dynamodb.DynamoDB, error) {
+	awsAccessKeyID := utils.GetAWSAccessKey()
+	awsSecretAccessKey := utils.GetAWSSecretKey()
+
+	sess, err := session.NewSession(&aws.Config{
+
+		Region: aws.String("us-east-1"), // Change this to your preferred AWS region
+
+		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
+	})
+
+	if err != nil {
+		fmt.Println("Error creating AWS session:", err)
+
+		return nil, err
+	}
+
+	return dynamodb.New(sess), nil
 }
