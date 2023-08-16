@@ -1,13 +1,15 @@
 package data
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-// var (
-// 	ErrRecordNotFound = errors.New("record not found")
-// 	ErrEditConflict   = errors.New("edit conflict")
-// )
+var (
+	ErrRecordNotFound = errors.New("record not found")
+	ErrEditConflict   = errors.New("edit conflict")
+)
 
 type Models struct {
 	Facilities FacilityModel

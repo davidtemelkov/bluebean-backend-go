@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"example/bluebean-go/internal/data"
 	"example/bluebean-go/internal/validator"
 	"fmt"
@@ -46,4 +47,19 @@ func (app *application) createFacilityHandler(c *gin.Context) {
 
 	c.Header("Location", fmt.Sprintf("/facilities/%s", facility.Name))
 	c.JSON(http.StatusCreated, gin.H{"facility": facility})
+}
+
+func (app *application) getFacilityHandler(c *gin.Context) {
+	id := c.Param("id")
+	facility, err := app.models.Facilities.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			c.JSON(http.StatusNotFound, gin.H{"error": "Facility not found"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"facility": facility})
 }

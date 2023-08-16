@@ -11,6 +11,7 @@ func (app *application) setupRoutes() *gin.Engine {
 	facilitiesRoutes := r.Group("/facilities")
 	{
 		facilitiesRoutes.POST("/", app.createFacilityHandler)
+		facilitiesRoutes.GET("/:id", app.getFacilityHandler)
 	}
 
 	r.Run(":8080")
