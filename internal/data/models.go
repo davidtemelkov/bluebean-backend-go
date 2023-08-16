@@ -12,11 +12,13 @@ var (
 )
 
 type Models struct {
+	Users UserModel
 	Facilities FacilityModel
 }
 
 func NewModels(db *dynamodb.DynamoDB) Models {
 	return Models{
+		Users: UserModel{DB: db},
 		Facilities: FacilityModel{DB: db},
 	}
 }
