@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -121,4 +122,37 @@ func (m UserModel) Insert(user *User) error {
 	}
 
 	return nil
+}
+
+func (m UserModel) GetByEmail(email string) (*User, error) {
+	key := map[string]*dynamodb.AttributeValue{
+		"PK": {
+			S: aws.String("USER#" + email),
+		},
+		"SK": {
+			S: aws.String("USER#" + email),
+		},
+	}
+
+	input := &dynamodb.GetItemInput{
+		TableName: aws.String("Bluebean"),
+		Key:       key,
+	}
+
+	result, err := m.DB.GetItem(input)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Item) == 0 {
+		return nil, nil // User not found
+	}
+
+	user := &User{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

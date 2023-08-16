@@ -16,7 +16,8 @@ func (app *application) regiserUserHandler(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&input); err != nil {
-		panic("Wrong json format.")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Wrong json format"})
+		return
 	}
 
 	user := &data.User{
@@ -27,13 +28,32 @@ func (app *application) regiserUserHandler(c *gin.Context) {
 
 	err := user.Password.Set(input.Password)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
 		return
 	}
 
 	err = app.models.Users.Insert(user)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
 		return
 	}
 
 	c.IndentedJSON(http.StatusCreated, user)
+}
+
+func (app *application) getUserByEmailHandler(c *gin.Context) {
+	email := c.Param("email")
+
+	user, err := app.models.Users.GetByEmail(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
+		return
+	}
+
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
