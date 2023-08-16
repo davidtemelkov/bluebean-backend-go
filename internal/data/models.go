@@ -10,8 +10,11 @@ import (
 // )
 
 type Models struct {
+	Facilities FacilityModel
 }
 
 func NewModels(db *dynamodb.DynamoDB) Models {
-	return Models{}
+	return Models{
+		Facilities: FacilityModel{DB: db},
+	}
 }

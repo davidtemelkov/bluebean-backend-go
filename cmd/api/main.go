@@ -29,52 +29,11 @@ func main() {
 		panic("Db connection error")
 	}
 
-	// app := &application{
-	// 	models: data.NewModels(dbClient),
-	// }
-
-	input := &dynamodb.PutItemInput{
-
-		TableName: aws.String("Bluebean"),
-
-		Item: map[string]*dynamodb.AttributeValue{
-
-			// "PK": {
-
-			// 	S: aws.String("proba"),
-			// },
-
-			// "SK": {
-
-			// 	S: aws.String("bountyhunter1"),
-			// },
-
-			// "Proba": {
-			// 	S: aws.String("probaNaProbata"),
-			// },
-		},
-
-		// Add a condition expression to check if SessionToken attribute doesn't exist
-
-		ConditionExpression: aws.String("attribute_not_exists(SessionToken)"),
+	app := &application{
+		models: data.NewModels(db),
 	}
 
-	// Put the item into DynamoDB table
-
-	_, err = db.PutItem(input)
-
-	if err != nil {
-
-		fmt.Println("Error putting item into DynamoDB:", err)
-
-		return
-
-	}
-
-	fmt.Println("Item successfully put into DynamoDB")
-
-	setupRoutes()
-
+	app.setupRoutes()
 }
 
 func openDb() (*dynamodb.DynamoDB, error) {
