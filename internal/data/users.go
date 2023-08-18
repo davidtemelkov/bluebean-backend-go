@@ -16,6 +16,7 @@ type User struct {
 	Email    string   `json:"email"`
 	Password password `json:"-"`
 	Role     string   `json:"role"`
+	AddedOn  string   `json:"addedOn,omitempty"`
 }
 
 var (

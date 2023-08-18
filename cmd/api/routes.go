@@ -11,12 +11,14 @@ func (app *application) setupRoutes() *gin.Engine {
 	{
 		usersRoutes.POST("/", app.regiserUserHandler)
 		usersRoutes.GET("/:email", app.getUserByEmailHandler)
-  }
+	}
 
 	facilitiesRoutes := r.Group("/facilities")
 	{
 		facilitiesRoutes.POST("/", app.createFacilityHandler)
-		facilitiesRoutes.GET("/:id", app.getFacilityHandler)
+		facilitiesRoutes.GET("/:facilityName", app.getFacilityHandler)
+		facilitiesRoutes.POST("/:facilityName/user/:email", app.addUserToFacilityHandler)
+		facilitiesRoutes.GET("/:facilityName/users", app.getAllUsersForFacility)
 	}
 
 	r.Run(":8080")
