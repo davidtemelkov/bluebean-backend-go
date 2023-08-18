@@ -189,6 +189,7 @@ func (um UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
 
 	for _, item := range result.Items {
 		facility := Facility{
+			ID:       *item["FacilityID"].S,
 			Name:     *item["FacilityName"].S,
 			Address:  *item["FacilityAddress"].S,
 			ImageURL: *item["FacilityImageURL"].S,
