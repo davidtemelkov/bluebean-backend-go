@@ -68,3 +68,29 @@ func (app *application) getUserByEmailHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+func (app *application) getFacilitiesForUserHandler(c *gin.Context) {
+	email := c.Param("email")
+
+	//Might want to return empty json if user doesn't exist
+	user, err := app.models.Users.GetByEmail(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
+		return
+	}
+
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	facilities, err := app.models.Users.GetAllFacilitiesForUser(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
+		return
+	}
+
+	//Might only want to return user as well
+	// c.JSON(http.StatusOK, gin.H{"user": user, "facilities": facilities})
+	c.JSON(http.StatusOK, gin.H{"facilities": facilities})
+}
