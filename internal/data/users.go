@@ -1,8 +1,10 @@
 package data
 
 import (
+	"context"
 	"errors"
 	"example/bluebean-go/internal/validator"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -77,7 +79,7 @@ type UserModel struct {
 	DB *dynamodb.DynamoDB
 }
 
-func (m UserModel) Insert(user *User) error {
+func (um UserModel) Insert(user *User) error {
 	item := map[string]*dynamodb.AttributeValue{
 		"PK": {
 			S: aws.String("USER#" + user.Email),
@@ -105,7 +107,10 @@ func (m UserModel) Insert(user *User) error {
 		ConditionExpression: aws.String("attribute_not_exists(PK)"),
 	}
 
-	_, err := m.DB.PutItem(input)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := um.DB.PutItemWithContext(ctx, input)
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
 			if awsErr.Code() == dynamodb.ErrCodeConditionalCheckFailedException {
@@ -118,7 +123,7 @@ func (m UserModel) Insert(user *User) error {
 	return nil
 }
 
-func (m UserModel) GetByEmail(email string) (*User, error) {
+func (um UserModel) GetByEmail(email string) (*User, error) {
 	key := map[string]*dynamodb.AttributeValue{
 		"PK": {
 			S: aws.String("USER#" + email),
@@ -133,7 +138,10 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		Key:       key,
 	}
 
-	result, err := m.DB.GetItem(input)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := um.DB.GetItemWithContext(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +159,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func (m UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
+func (um UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
 	keyConditionExpression := "PK = :pk AND begins_with(SK, :skPrefix)"
 	expressionAttributeValues := map[string]*dynamodb.AttributeValue{
 		":pk": {
@@ -168,7 +176,10 @@ func (m UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
 		ExpressionAttributeValues: expressionAttributeValues,
 	}
 
-	result, err := m.DB.Query(queryInput)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := um.DB.QueryWithContext(ctx, queryInput)
 	if err != nil {
 		return nil, err
 	}
