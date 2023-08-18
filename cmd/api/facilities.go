@@ -17,7 +17,7 @@ func (app *application) createFacilityHandler(c *gin.Context) {
 		Address      string   `json:"address"`
 		City         string   `json:"city"`
 		Creator      string   `json:"creator"`
-		ImageUrl     string   `json:"imageurl"`
+		ImageURL     string   `json:"imageurl"`
 	}
 
 	if err := c.BindJSON(&input); err != nil {
@@ -31,7 +31,7 @@ func (app *application) createFacilityHandler(c *gin.Context) {
 		Address:  input.Address,
 		City:     input.City,
 		Creator:  input.Creator,
-		ImageUrl: input.ImageUrl,
+		ImageURL: input.ImageURL,
 	}
 
 	v := validator.New()
@@ -50,8 +50,8 @@ func (app *application) createFacilityHandler(c *gin.Context) {
 }
 
 func (app *application) getFacilityHandler(c *gin.Context) {
-	id := c.Param("id")
-	facility, err := app.models.Facilities.Get(id)
+	facilityName := c.Param("facilityName")
+	facility, err := app.models.Facilities.Get(facilityName)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -62,4 +62,26 @@ func (app *application) getFacilityHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"facility": facility})
+}
+
+func (app *application) addUserToFacilityHandler(c *gin.Context) {
+	facilityName := c.Param("facilityName")
+	email := c.Param("email")
+
+	err := app.models.Facilities.AddUserToFacility(email, facilityName, app.models.Users)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "User added to facility"})
+}
+
+func (app *application) getAllUsersForFacility(c *gin.Context) {
+	facilityName := c.Param("facilityName")
+	users, err := app.models.Facilities.GetAllUsersForFacility(facilityName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }
