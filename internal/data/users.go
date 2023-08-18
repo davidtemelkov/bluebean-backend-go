@@ -150,3 +150,40 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 
 	return user, nil
 }
+
+func (m UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
+	keyConditionExpression := "PK = :pk AND begins_with(SK, :skPrefix)"
+	expressionAttributeValues := map[string]*dynamodb.AttributeValue{
+		":pk": {
+			S: aws.String("USER#" + email),
+		},
+		":skPrefix": {
+			S: aws.String("FACILITY#"),
+		},
+	}
+
+	queryInput := &dynamodb.QueryInput{
+		TableName:                 aws.String("Bluebean"),
+		KeyConditionExpression:    aws.String(keyConditionExpression),
+		ExpressionAttributeValues: expressionAttributeValues,
+	}
+
+	result, err := m.DB.Query(queryInput)
+	if err != nil {
+		return nil, err
+	}
+
+	facilities := make([]Facility, 0)
+
+	for _, item := range result.Items {
+		facility := Facility{
+			Name:     *item["FacilityName"].S,
+			Address:  *item["FacilityAddress"].S,
+			ImageUrl: *item["FacilityImageURL"].S,
+		}
+
+		facilities = append(facilities, facility)
+	}
+
+	return facilities, nil
+}
