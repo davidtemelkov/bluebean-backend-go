@@ -8,9 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/google/uuid"
 )
 
 type Facility struct {
+	ID       string   `json:"id"`
 	Name     string   `json:"name"`
 	Owners   []string `json:"owners"`
 	Address  string   `json:"address"`
@@ -33,13 +35,18 @@ func ValidateFacility(v *validator.Validator, facility *Facility) {
 	v.Check(facility.ImageURL != "", "imageurl", "must be provided")
 }
 
-func (fm FacilityModel) InsertFacility(facility *Facility) error {
+func (fm FacilityModel) InsertFacility(facility *Facility) (uuid.UUID, error) {
+	id := uuid.New()
+
 	item := map[string]*dynamodb.AttributeValue{
 		"PK": {
-			S: aws.String("FACILITY#" + facility.Name),
+			S: aws.String("FACILITY#" + id.String()),
 		},
 		"SK": {
-			S: aws.String("FACILITY#" + facility.Name),
+			S: aws.String("FACILITY#" + id.String()),
+		},
+		"ID": {
+			S: aws.String(id.String()),
 		},
 		"Name": {
 			S: aws.String(facility.Name),
@@ -71,14 +78,14 @@ func (fm FacilityModel) InsertFacility(facility *Facility) error {
 
 	_, err := fm.DB.PutItemWithContext(ctx, input)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
-	return nil
+	return id, nil
 }
 
-func (fm FacilityModel) Get(facilityName string) (*Facility, error) {
-	if facilityName == "" {
+func (fm FacilityModel) Get(id string) (*Facility, error) {
+	if id == "" {
 		return nil, ErrRecordNotFound
 	}
 
@@ -86,10 +93,10 @@ func (fm FacilityModel) Get(facilityName string) (*Facility, error) {
 		TableName: aws.String("Bluebean"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"PK": {
-				S: aws.String("FACILITY#" + facilityName),
+				S: aws.String("FACILITY#" + id),
 			},
 			"SK": {
-				S: aws.String("FACILITY#" + facilityName),
+				S: aws.String("FACILITY#" + id),
 			},
 		},
 	}
@@ -115,8 +122,8 @@ func (fm FacilityModel) Get(facilityName string) (*Facility, error) {
 	return facility, nil
 }
 
-func (fm FacilityModel) AddUserToFacility(userEmail string, facilityName string, um UserModel) error {
-	facility, err := fm.Get(facilityName)
+func (fm FacilityModel) AddUserToFacility(userEmail string, id string, um UserModel) error {
+	facility, err := fm.Get(id)
 	if err != nil {
 		return ErrRecordNotFound
 	}
@@ -131,9 +138,10 @@ func (fm FacilityModel) AddUserToFacility(userEmail string, facilityName string,
 			S: aws.String("USER#" + userEmail),
 		},
 		"SK": {
-			S: aws.String("FACILITY#" + facilityName),
+			S: aws.String("FACILITY#" + id),
 		},
-		"FacilityName":     {S: aws.String(facilityName)},
+		"FacilityID":       {S: aws.String(id)},
+		"FacilityName":     {S: aws.String(facility.Name)},
 		"FacilityAddress":  {S: aws.String(facility.Address)},
 		"FacilityImageURL": {S: aws.String(facility.ImageURL)},
 		"UserEmail":        {S: aws.String(userEmail)},
@@ -141,7 +149,7 @@ func (fm FacilityModel) AddUserToFacility(userEmail string, facilityName string,
 		"UserRole":         {S: aws.String(user.Role)},
 		"UserAddedOn":      {S: aws.String(time.Now().String())},
 		"GSI1PK": {
-			S: aws.String("FACILITY#" + facilityName),
+			S: aws.String("FACILITY#" + id),
 		},
 		"GSI1SK": {
 			S: aws.String("USER#" + userEmail),
@@ -164,11 +172,11 @@ func (fm FacilityModel) AddUserToFacility(userEmail string, facilityName string,
 	return nil
 }
 
-func (fm FacilityModel) GetAllUsersForFacility(facilityName string) ([]User, error) {
+func (fm FacilityModel) GetAllUsersForFacility(id string) ([]User, error) {
 	keyConditionExpression := "GSI1PK = :gsi1pk AND begins_with(GSI1SK, :gsi1skPrefix)"
 	expressionAttributeValues := map[string]*dynamodb.AttributeValue{
 		":gsi1pk": {
-			S: aws.String("FACILITY#" + facilityName),
+			S: aws.String("FACILITY#" + id),
 		},
 		":gsi1skPrefix": {
 			S: aws.String("USER#"),

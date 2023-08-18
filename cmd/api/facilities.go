@@ -4,7 +4,6 @@ import (
 	"errors"
 	"example/bluebean-go/internal/data"
 	"example/bluebean-go/internal/validator"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,12 +39,15 @@ func (app *application) createFacilityHandler(c *gin.Context) {
 		return
 	}
 
-	if err := app.models.Facilities.InsertFacility(facility); err != nil {
+	id, err := app.models.Facilities.InsertFacility(facility)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert facility"})
 		return
 	}
 
-	c.Header("Location", fmt.Sprintf("/facilities/%s", facility.Name))
+	facility.ID = id.String()
+
+	//c.Header("Location", fmt.Sprintf("/facilities/%s", facility.Name))
 	c.JSON(http.StatusCreated, gin.H{"facility": facility})
 }
 
