@@ -66,8 +66,15 @@ func (fm FacilityModel) InsertFacility(facility *Facility) error {
 		TableName: aws.String("Bluebean"),
 	}
 
-	_, err := fm.DB.PutItem(input)
-	return err
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := fm.DB.PutItemWithContext(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (fm FacilityModel) Get(facilityName string) (*Facility, error) {
@@ -146,7 +153,10 @@ func (fm FacilityModel) AddUserToFacility(userEmail string, facilityName string,
 		Item:      item,
 	}
 
-	_, err = fm.DB.PutItem(input)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err = fm.DB.PutItemWithContext(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -172,7 +182,10 @@ func (fm FacilityModel) GetAllUsersForFacility(facilityName string) ([]User, err
 		ExpressionAttributeValues: expressionAttributeValues,
 	}
 
-	result, err := fm.DB.Query(queryInput)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := fm.DB.QueryWithContext(ctx, queryInput)
 	if err != nil {
 		return nil, err
 	}
