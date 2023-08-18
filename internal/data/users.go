@@ -191,7 +191,7 @@ func (um UserModel) GetAllFacilitiesForUser(email string) ([]Facility, error) {
 		facility := Facility{
 			Name:     *item["FacilityName"].S,
 			Address:  *item["FacilityAddress"].S,
-			ImageUrl: *item["FacilityImageURL"].S,
+			ImageURL: *item["FacilityImageURL"].S,
 		}
 
 		facilities = append(facilities, facility)
