@@ -1,0 +1,21 @@
+{{define "subject"}}Join BlueBean!{{end}}
+{{define "plainBody"}} Hi,
+You have been invited to join the {{.FacilityName}} facility in BlueBean where you can create an account in the role of {{.UserRole}}. We'll be excited to have you on board!
+You can register here: {{.RegisterLink}}
+Thanks,
+The Bluebean Team
+{{end}}
+{{define "htmlBody"}} <!doctype html> <html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body> <p>Hi,</p>
+<p>You have been invited to join the {{.FacilityName}} facility in BlueBean where you can create an account in the role of {{.UserRole}}.</p> 
+<p>We'll be excited to have you on board!</p>
+<p>You can register here: <a href="{{.RegisterLink}}" target="_blank">{{.RegisterLink}}</a> </p>
+<p>Thanks,</p>
+<p>The Bluebean Team</p>
+</body>
+</html>
+{{end}}

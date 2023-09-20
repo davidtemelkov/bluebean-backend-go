@@ -2,6 +2,9 @@ package validator
 
 import (
 	"regexp"
+	"time"
+
+	"bitbucket.org/nemetschek-systems/bluebean-service/internal/generalconstants"
 )
 
 // Declare a regular expression for sanity checking the format of email addresses (we'll
@@ -10,7 +13,7 @@ import (
 // reading this in PDF or EPUB format and cannot see the full pattern, please see the
 // note further down the page.
 var (
-	EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	EmailRX = regexp.MustCompile(generalconstants.EmailRX)
 )
 
 // Define a new Validator type which contains a map of validation errors.
@@ -65,4 +68,20 @@ func Unique[T comparable](values []T) bool {
 		uniqueValues[value] = true
 	}
 	return len(values) == len(uniqueValues)
+}
+
+func (v *Validator) IsValidDateTimeRange(dateTimeStartStr, dateTimeEndStr string) bool {
+
+	dateTimeStart, err := time.Parse("2006-01-02T15:04:05Z", dateTimeStartStr)
+	if err != nil {
+		return false
+	}
+
+	dateTimeEnd, err := time.Parse("2006-01-02T15:04:05Z", dateTimeEndStr)
+	if err != nil {
+		return false
+	}
+
+	isValidDate := !dateTimeStart.After(dateTimeEnd)
+	return isValidDate
 }

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"example/bluebean-go/internal/data"
-	"example/bluebean-go/internal/utils"
-	"fmt"
-
+	"bitbucket.org/nemetschek-systems/bluebean-service/internal/data"
+	"bitbucket.org/nemetschek-systems/bluebean-service/internal/errorconstants"
+	"bitbucket.org/nemetschek-systems/bluebean-service/internal/mailer"
+	"bitbucket.org/nemetschek-systems/bluebean-service/internal/utils"
 	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -15,10 +15,8 @@ import (
 )
 
 type application struct {
-	// logger *log.Logger
-	// // models data.Models
-	// wg sync.WaitGroup
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -26,11 +24,12 @@ func main() {
 
 	db, err := openDb()
 	if err != nil {
-		panic("Db connection error")
+		panic(errorconstants.DBConnectionError.Error())
 	}
 
 	app := &application{
 		models: data.NewModels(db),
+		mailer: mailer.New(utils.GetSMTPHost(), utils.GetSMTPPort(), utils.GetSMTPUsername(), utils.GetSMTPPassword(), utils.GetSMTPSender()),
 	}
 
 	app.setupRoutes()
@@ -42,14 +41,12 @@ func openDb() (*dynamodb.DynamoDB, error) {
 
 	sess, err := session.NewSession(&aws.Config{
 
-		Region: aws.String("us-east-1"), // Change this to your preferred AWS region
+		Region: aws.String("us-east-1"),
 
 		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
 	})
 
 	if err != nil {
-		fmt.Println("Error creating AWS session:", err)
-
 		return nil, err
 	}
 

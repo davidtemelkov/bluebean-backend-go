@@ -1,24 +1,25 @@
 package data
 
 import (
-	"errors"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-var (
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
-)
-
 type Models struct {
-	Users UserModel
-	Facilities FacilityModel
+	Users          UserModel
+	Facilities     FacilityModel
+	UserFacilities UserFacilityModel
+	Spaces         SpaceModel
+	Punches        PunchModel
+	Comments       CommentModel
 }
 
 func NewModels(db *dynamodb.DynamoDB) Models {
 	return Models{
-		Users: UserModel{DB: db},
-		Facilities: FacilityModel{DB: db},
+		Users:          UserModel{DB: db},
+		Facilities:     FacilityModel{DB: db},
+		UserFacilities: UserFacilityModel{DB: db},
+		Spaces:         SpaceModel{DB: db},
+		Punches:        PunchModel{DB: db},
+		Comments:       CommentModel{DB: db},
 	}
 }
